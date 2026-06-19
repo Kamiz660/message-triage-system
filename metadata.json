@@ -1,0 +1,6 @@
+{
+  "name": "Message Triage System",
+  "description": "A high-performance government dashboard UI for fast scanning and rapid triage of WhatsApp-based complaints.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
