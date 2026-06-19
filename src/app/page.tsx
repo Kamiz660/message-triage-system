@@ -466,8 +466,8 @@ export default function App() {
     <div className="min-h-screen bg-[#F3F4F6] text-[#1F2937] antialiased pb-24 font-sans select-none tracking-normal">
       
       {/* 1. TOP UTILITY STATUS BAR */}
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-xs px-4 sm:px-6 py-3.5">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <header className="relative md:sticky md:top-0 z-40 bg-white border-b border-gray-200 shadow-xs px-4 sm:px-6 py-2.5 md:py-3.5">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
           
           {/* Brand Titles */}
           <div className="flex items-center gap-3">
@@ -519,7 +519,7 @@ export default function App() {
 
             <button
               onClick={() => setShowShortcutsHelp(true)}
-              className="bg-white hover:bg-slate-100 border border-gray-300 p-2 rounded-lg text-gray-600 shadow-xs hover:text-gray-900 transition-colors"
+              className="hidden md:inline-flex bg-white hover:bg-slate-100 border border-gray-300 p-2 rounded-lg text-gray-600 shadow-xs hover:text-gray-900 transition-colors"
               title="View Triage Keyboard Shortcuts [?]"
             >
               <Keyboard className="w-4 h-4" />
@@ -631,7 +631,7 @@ export default function App() {
 
 
         {/* 3. CORE FILTER & SEARCH BAR BLOCK (STICKY SUB-HEADER) */}
-        <div className="sticky top-[73px] sm:top-[73px] md:top-[73px] z-30 bg-white border border-gray-200 rounded-lg p-4 shadow-xs mb-6 select-text">
+        <div className="sticky top-0 md:top-[73px] z-30 bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-xs mb-6 select-text">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             
             {/* LARGE PILL FILTERS (ALL, UNRESOLVED, RESOLVED) */}
@@ -783,7 +783,7 @@ export default function App() {
         <div className="select-text space-y-6">
           
           {/* DATE GROUP TOGGLES */}
-          <div className="flex flex-wrap items-center gap-6 border-b border-gray-200 select-none">
+          <div className="flex flex-wrap items-center gap-4 md:gap-6 border-b border-gray-200 select-none">
             {(['Today', 'Yesterday', 'Older'] as const).map(tab => {
               const count = groupedComplaints[tab].length;
               const isActive = dateFilter === tab;

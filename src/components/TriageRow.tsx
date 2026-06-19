@@ -99,6 +99,96 @@ const InlinePicker = ({
   return createPortal(modalContent, document.body);
 };
 
+const SlidingStatusToggle = ({
+  status,
+  onToggle
+}: {
+  status: 'unresolved' | 'resolved';
+  onToggle: (event: React.MouseEvent | React.KeyboardEvent) => void;
+}) => {
+  const isUnresolved = status === 'unresolved';
+  const containerWidth = 128; // slightly wider to fit labels perfectly
+  const knobWidth = 28;
+  const padding = 4;
+  const slideDistance = containerWidth - knobWidth - (padding * 2); // 128 - 28 - 8 = 92px
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      onToggle(e);
+    }
+  };
+
+  return (
+    <div 
+      role="switch"
+      aria-checked={!isUnresolved}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle(e);
+      }}
+      className={`relative h-9 rounded-full border cursor-pointer flex items-center select-none overflow-hidden transition-all duration-350 shadow-xs hover:scale-[1.02] active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1
+        ${isUnresolved 
+          ? 'bg-orange-50/80 border-orange-200/80 hover:bg-orange-100/80 hover:border-orange-300' 
+          : 'bg-teal-50/80 border-teal-200/80 hover:bg-teal-100/80 hover:border-teal-300'}
+      `}
+      style={{ width: `${containerWidth}px`, padding: `${padding}px` }}
+      title="Click to toggle status (Or press Spacebar)"
+    >
+      {/* Sliding background layer */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        animate={{
+          backgroundColor: isUnresolved ? 'rgba(255, 237, 213, 0.4)' : 'rgba(204, 251, 241, 0.4)'
+        }}
+        transition={{ duration: 0.2 }}
+      />
+
+      {/* Label Text - sliding/fading depending on state using absolute positioning */}
+      <div className="absolute inset-0 pointer-events-none text-[9px] font-extrabold tracking-wider font-sans select-none">
+        <motion.span 
+          animate={{ 
+            opacity: isUnresolved ? 0 : 1,
+            x: isUnresolved ? -8 : 0
+          }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-teal-700"
+        >
+          RESOLVED
+        </motion.span>
+        
+        <motion.span 
+          animate={{ 
+            opacity: isUnresolved ? 1 : 0,
+            x: isUnresolved ? 0 : 8
+          }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-orange-700"
+        >
+          UNRESOLVED
+        </motion.span>
+      </div>
+
+      {/* Sliding knob with spring physics */}
+      <motion.div
+        animate={{
+          x: isUnresolved ? 0 : slideDistance
+        }}
+        transition={{ type: "spring", stiffness: 450, damping: 28 }}
+        className="relative z-10 w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center border border-white"
+      >
+        {isUnresolved ? (
+          <AlertTriangle className="w-3.5 h-3.5 text-orange-600 animate-pulse" />
+        ) : (
+          <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
 interface TriageRowProps {
   complaint: ComplaintMessage;
   uniqueCategories: string[];
@@ -212,7 +302,7 @@ export const TriageRow: React.FC<TriageRowProps> = ({
           }
           onToggleExpand();
         }}
-        className="flex flex-col md:flex-row md:items-center py-4 px-5 gap-3 md:gap-4 cursor-pointer"
+        className="flex flex-col md:flex-row md:items-center py-3.5 px-4 md:py-4 md:px-5 gap-3 md:gap-4 cursor-pointer"
       >
         {/* LEFT: Metadata */}
         <div className="w-full md:w-44 flex md:flex-col items-center md:items-start justify-between md:justify-center shrink-0">
@@ -325,33 +415,12 @@ export const TriageRow: React.FC<TriageRowProps> = ({
           </div>
         </div>
 
-        {/* RIGHT: Status Pill (Click to Toggle) */}
-        <div className="status-click-zone shrink-0 self-end md:self-center mt-2 md:mt-0">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleStatus(complaint.id, e);
-            }}
-            className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer outline-none focus:ring-2 focus:ring-blue-600 hover:scale-[1.02] active:scale-[0.98]
-              ${isUnresolved 
-                ? 'bg-orange-50/80 text-orange-700 border-orange-200/80 hover:bg-orange-100/80' 
-                : 'bg-teal-50/80 text-teal-700 border-teal-200/80 hover:bg-teal-100/80'}
-            `}
-            title="Click to toggle status (Or press Spacebar)"
-          >
-            {isUnresolved ? (
-              <>
-                <AlertTriangle className="w-3.5 h-3.5 text-orange-600 animate-pulse" />
-                <span className="uppercase tracking-wider">Unresolved</span>
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
-                <span className="uppercase tracking-wider">Resolved</span>
-              </>
-            )}
-          </button>
+        {/* RIGHT: Status Sliding Switch */}
+        <div className="status-click-zone shrink-0 self-end md:self-center mt-1.5 md:mt-0">
+          <SlidingStatusToggle
+            status={complaint.status}
+            onToggle={(e) => onToggleStatus(complaint.id, e)}
+          />
         </div>
 
         {/* Collapse toggle arrow */}
@@ -370,7 +439,7 @@ export const TriageRow: React.FC<TriageRowProps> = ({
             transition={{ duration: 0.18, ease: 'easeInOut' }}
             className="overflow-hidden border-t border-gray-100 bg-slate-50/60"
           >
-            <div className="p-5 flex flex-col lg:flex-row gap-6">
+            <div className="p-4 md:p-5 flex flex-col lg:flex-row gap-5 md:gap-6">
               
               {/* Left detail zone: Full complaint body & Audit log */}
               <div className="flex-1 flex flex-col gap-5">
