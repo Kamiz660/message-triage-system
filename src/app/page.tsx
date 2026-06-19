@@ -467,15 +467,15 @@ export default function App() {
       
       {/* 1. TOP UTILITY STATUS BAR */}
       <header className="relative md:sticky md:top-0 z-40 bg-white border-b border-gray-200 shadow-xs px-4 sm:px-6 py-2.5 md:py-3.5">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
+        <div className="max-w-6xl mx-auto flex flex-col items-center md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
           
           {/* Brand Titles */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col items-center md:flex-row md:items-center gap-3">
             <div className="bg-[#2563EB] text-white p-2 rounded-lg flex items-center justify-center shrink-0">
               <Inbox className="w-5.5 h-5.5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2">
                 <span className="font-sans text-[10px] font-bold bg-orange-500 text-white px-2 py-0.5 rounded tracking-wider uppercase select-none">
                   WhatsApp Direct
                 </span>
@@ -490,7 +490,7 @@ export default function App() {
           </div>
 
           {/* Real-time Triage Status HUD */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4 md:self-end">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 sm:gap-4 md:self-end">
             {/* Live ticking virtual time reference */}
             <div className="bg-slate-100 border border-slate-200 hover:border-slate-300 py-1.5 px-3 rounded-lg flex items-center gap-2 text-xs text-gray-600">
               <Clock className="w-4 h-4 text-gray-400 shrink-0" />
