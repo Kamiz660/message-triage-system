@@ -108,9 +108,6 @@ const SlidingStatusToggle = ({
 }) => {
   const isUnresolved = status === 'unresolved';
   const containerWidth = 128; // slightly wider to fit labels perfectly
-  const knobWidth = 28;
-  const padding = 4;
-  const slideDistance = containerWidth - knobWidth - (padding * 2); // 128 - 28 - 8 = 92px
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
@@ -129,12 +126,12 @@ const SlidingStatusToggle = ({
         e.stopPropagation();
         onToggle(e);
       }}
-      className={`relative h-9 rounded-full border cursor-pointer flex items-center select-none overflow-hidden transition-all duration-350 shadow-xs hover:scale-[1.02] active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1
+      className={`relative h-9 rounded-full border cursor-pointer flex items-center select-none overflow-hidden transition-all duration-350 shadow-xs hover:scale-[1.02] active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 p-1 shrink-0 box-border
         ${isUnresolved 
-          ? 'bg-orange-50/80 border-orange-200/80 hover:bg-orange-100/80 hover:border-orange-300' 
-          : 'bg-teal-50/80 border-teal-200/80 hover:bg-teal-100/80 hover:border-teal-300'}
+          ? 'bg-orange-50/80 border-orange-200/80 hover:bg-orange-100/80 hover:border-orange-300 justify-start' 
+          : 'bg-teal-50/80 border-teal-200/80 hover:bg-teal-100/80 hover:border-teal-300 justify-end'}
       `}
-      style={{ width: `${containerWidth}px`, padding: `${padding}px` }}
+      style={{ width: `${containerWidth}px` }}
       title="Click to toggle status (Or press Spacebar)"
     >
       {/* Sliding background layer */}
@@ -173,11 +170,9 @@ const SlidingStatusToggle = ({
 
       {/* Sliding knob with spring physics */}
       <motion.div
-        animate={{
-          x: isUnresolved ? 0 : slideDistance
-        }}
+        layout
         transition={{ type: "spring", stiffness: 450, damping: 28 }}
-        className="relative z-10 w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center border border-white"
+        className="relative z-10 w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center border border-white shrink-0"
       >
         {isUnresolved ? (
           <AlertTriangle className="w-3.5 h-3.5 text-orange-600 animate-pulse" />

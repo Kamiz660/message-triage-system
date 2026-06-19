@@ -563,12 +563,12 @@ export default function App() {
               <span className="text-xs font-bold font-mono uppercase tracking-wider text-gray-600">
                 Inbound WhatsApp Simulation Hub
               </span>
-              <span className="bg-slate-200 text-slate-800 text-[10px] font-mono px-1.5 py-0.2 rounded select-none">
+              <span className="bg-slate-200 text-slate-800 text-[10px] font-mono px-1.5 py-0.2 rounded select-none shrink-0">
                 Dev Tool
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-gray-400 font-medium">
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="hidden sm:inline text-[11px] text-gray-400 font-medium">
                 {showSimulator ? "Hide simulation panel" : "Expand to trigger new mock WhatsApp messages"}
               </span>
               <span className="text-gray-400 font-mono text-[11px]">
@@ -635,7 +635,7 @@ export default function App() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             
             {/* LARGE PILL FILTERS (ALL, UNRESOLVED, RESOLVED) */}
-            <div className="flex items-center gap-1.5 bg-gray-50 p-1.5 rounded-lg border border-gray-200 self-start">
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-lg border border-gray-200 self-start overflow-x-auto w-full sm:w-auto scrollbar-hide shrink-0">
               <button
                 type="button"
                 aria-label="Show unresolved items"
@@ -643,7 +643,7 @@ export default function App() {
                   setStatusFilter('unresolved');
                   setFocusedId(null);
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all cursor-pointer outline-none focus:ring-2 focus:ring-blue-500
+                className={`flex shrink-0 items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold transition-all cursor-pointer outline-none focus:ring-2 focus:ring-blue-500
                   ${statusFilter === 'unresolved' 
                     ? 'bg-orange-100 text-orange-700 shadow-sm ring-1 ring-orange-200 focus:outline-none' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}
@@ -660,7 +660,7 @@ export default function App() {
                   setStatusFilter('all');
                   setFocusedId(null);
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all cursor-pointer outline-none focus:ring-2 focus:ring-blue-500
+                className={`flex shrink-0 items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold transition-all cursor-pointer outline-none focus:ring-2 focus:ring-blue-500
                   ${statusFilter === 'all' 
                     ? 'bg-blue-100 text-blue-700 shadow-sm ring-1 ring-blue-200 focus:outline-none' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}
@@ -677,7 +677,7 @@ export default function App() {
                   setStatusFilter('resolved');
                   setFocusedId(null);
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all cursor-pointer outline-none focus:ring-2 focus:ring-blue-500
+                className={`flex shrink-0 items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold transition-all cursor-pointer outline-none focus:ring-2 focus:ring-blue-500
                   ${statusFilter === 'resolved' 
                     ? 'bg-emerald-100 text-emerald-700 shadow-sm ring-1 ring-emerald-200' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}
