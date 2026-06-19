@@ -535,16 +535,16 @@ export default function App() {
         <AnimatePresence>
           {showSuccessToast && (
             <motion.div
-              initial={{ opacity: 0, y: -15 }}
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              className="fixed bottom-6 right-6 z-50 bg-gray-900 text-white text-xs py-3 px-4 rounded-lg shadow-xl flex items-center gap-3 border border-gray-800"
+              exit={{ opacity: 0, y: -20 }}
+              className="fixed top-4 left-1/2 -translate-x-1/2 md:top-auto md:bottom-6 md:left-auto md:right-6 md:translate-x-0 z-50 bg-gray-900 text-white text-xs py-3 px-4 rounded-lg shadow-xl flex items-center gap-3 border border-gray-800 max-w-[90vw]"
             >
-              <div className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>{showSuccessToast}</span>
+              <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+              <span className="truncate">{showSuccessToast}</span>
               <button 
                 onClick={() => setShowSuccessToast(null)} 
-                className="text-gray-400 hover:text-white ml-2 cursor-pointer"
+                className="text-gray-400 hover:text-white ml-2 cursor-pointer shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -552,8 +552,8 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* 2. EMERGENCY INBOUND SIMULATOR BOARD (ELEGANT DRAWER MOCKUP) */}
-        <div className="mb-6 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs select-text">
+        {/* 2. EMERGENCY INBOUND SIMULATOR BOARD — hidden on mobile to save space */}
+        <div className="hidden md:block mb-6 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs select-text">
           <div 
             onClick={() => setShowSimulator(!showSimulator)} 
             className="flex items-center justify-between px-5 py-3 cursor-pointer bg-slate-50 hover:bg-slate-100 border-b border-slate-200 select-none"
@@ -635,7 +635,7 @@ export default function App() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             
             {/* LARGE PILL FILTERS (ALL, UNRESOLVED, RESOLVED) */}
-            <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-lg border border-gray-200 self-start overflow-x-auto w-full sm:w-auto scrollbar-hide shrink-0">
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-lg border border-gray-200 self-start w-full sm:w-auto overflow-x-auto scrollbar-hide">
               <button
                 type="button"
                 aria-label="Show unresolved items"

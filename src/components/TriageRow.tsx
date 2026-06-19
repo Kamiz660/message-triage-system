@@ -217,6 +217,59 @@ export const TriageRow: React.FC<TriageRowProps> = ({
   const [isSavingNotes, setIsSavingNotes] = React.useState(false);
   const [popoverState, setPopoverState] = React.useState<'category' | 'officer' | null>(null);
 
+  // Swipe gesture state (mobile only)
+  const [swipeX, setSwipeX] = React.useState(0);
+  const [isSwiping, setIsSwiping] = React.useState(false);
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const swipeThreshold = 80; // px needed to trigger action
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (isExpanded) return; // don't allow swipe on expanded cards
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+    setIsSwiping(false);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartRef.current || isExpanded) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+
+    // If vertical scroll is dominant, abort swipe
+    if (!isSwiping && Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 10) {
+      touchStartRef.current = null;
+      return;
+    }
+
+    // Once horizontal movement exceeds 10px, lock into swipe mode
+    if (Math.abs(deltaX) > 10) {
+      setIsSwiping(true);
+    }
+
+    if (isSwiping) {
+      // Clamp swipe range to ±120px
+      setSwipeX(Math.max(-120, Math.min(120, deltaX)));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartRef.current) return;
+
+    if (Math.abs(swipeX) >= swipeThreshold) {
+      // Swipe right = resolve, swipe left = unresolve
+      const targetStatus = swipeX > 0 ? 'resolved' : 'unresolved';
+      if (complaint.status !== targetStatus) {
+        onToggleStatus(complaint.id);
+      }
+    }
+
+    // Reset
+    setSwipeX(0);
+    setIsSwiping(false);
+    touchStartRef.current = null;
+  };
+
   // Sync internal notes state when complaint notes change
   useEffect(() => {
     setLocalNotes(complaint.notes || '');
@@ -272,12 +325,42 @@ export const TriageRow: React.FC<TriageRowProps> = ({
       id={`row-${complaint.id}`}
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      className={`group relative flex flex-col rounded-lg border transition-all duration-200 outline-none select-none shadow-sm
+      className={`group relative flex flex-col rounded-lg border transition-all duration-200 outline-none select-none shadow-sm overflow-hidden
         ${isFocused ? 'ring-2 ring-blue-600 border-gray-200' : 'border-gray-100 hover:border-gray-200'}
         ${isExpanded ? 'bg-white border-gray-200 ring-1 ring-gray-100 shadow-md' : 'bg-white hover:bg-slate-50/70'}
         ${!isExpanded && !isUnresolved ? 'opacity-70 saturate-50' : 'opacity-100'}
       `}
     >
+      {/* Swipe reveal layers — visible behind card when swiping */}
+      {!isExpanded && (
+        <>
+          {/* Right swipe = Resolve (green) */}
+          <div className="absolute inset-0 flex items-center justify-start pl-5 bg-emerald-500 text-white md:hidden pointer-events-none">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5" />
+              <span className="text-sm font-bold uppercase tracking-wider">Resolve</span>
+            </div>
+          </div>
+          {/* Left swipe = Unresolve (orange) */}
+          <div className="absolute inset-0 flex items-center justify-end pr-5 bg-orange-500 text-white md:hidden pointer-events-none">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold uppercase tracking-wider">Unresolve</span>
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Swipeable card content wrapper */}
+      <motion.div
+        animate={{ x: swipeX }}
+        transition={isSwiping ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 30 }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="relative bg-white rounded-lg z-10"
+        style={{ touchAction: isSwiping ? 'none' : 'pan-y' }}
+      >
       {/* Keyboard hotkey quick badges on focused row */}
       {isFocused && !isExpanded && (
         <div className="absolute top-2 right-4 flex items-center gap-1.5 pointer-events-none text-[10px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">
@@ -545,6 +628,7 @@ export const TriageRow: React.FC<TriageRowProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
+      </motion.div>
     </div>
   );
 };
