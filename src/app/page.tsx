@@ -87,6 +87,24 @@ export default function App() {
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState<string | null>(null);
 
+  // New Messages Badge State
+  const [newMessagesCount, setNewMessagesCount] = useState(0);
+  const [isScrolledDown, setIsScrolledDown] = useState(false);
+
+  // Scroll listener to update scroll state and auto-reset new message count at top
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 150) {
+        setIsScrolledDown(true);
+      } else {
+        setIsScrolledDown(false);
+        setNewMessagesCount(0);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const [delayedOutIds, setDelayedOutIds] = useState<Set<string>>(new Set());
   const [dateFilter, setDateFilter] = useState<'Today' | 'Yesterday' | 'Older'>('Today');
 
@@ -270,17 +288,22 @@ export default function App() {
 
     setComplaints(prev => [newArrival, ...prev]);
     showToast(`New WhatsApp complaint received from ${mobileNum}`);
-    // Auto expand newly arrived message for rapid triage
-    setExpandedId(uniqueId);
-    setFocusedId(uniqueId);
     
-    // Auto scroll to active simulation section
-    setTimeout(() => {
-      const element = document.getElementById(`row-${uniqueId}`);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }, 150);
+    if (isScrolledDown) {
+      setNewMessagesCount(c => c + 1);
+    } else {
+      // Auto expand newly arrived message for rapid triage
+      setExpandedId(uniqueId);
+      setFocusedId(uniqueId);
+      
+      // Auto scroll to active simulation section
+      setTimeout(() => {
+        const element = document.getElementById(`row-${uniqueId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 150);
+    }
   };
 
   const resetToDefaultDataset = () => {
@@ -470,12 +493,12 @@ export default function App() {
         <div className="max-w-6xl mx-auto flex flex-col items-center md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
           
           {/* Brand Titles */}
-          <div className="flex flex-col items-center md:flex-row md:items-center gap-3">
+          <div className="flex items-center gap-3">
             <div className="bg-[#2563EB] text-white p-2 rounded-lg flex items-center justify-center shrink-0">
               <Inbox className="w-5.5 h-5.5" />
             </div>
-            <div className="text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-2">
+            <div className="text-left">
+              <div className="flex items-center gap-2">
                 <span className="font-sans text-[10px] font-bold bg-orange-500 text-white px-2 py-0.5 rounded tracking-wider uppercase select-none">
                   WhatsApp Direct
                 </span>
@@ -490,9 +513,9 @@ export default function App() {
           </div>
 
           {/* Real-time Triage Status HUD */}
-          <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 sm:gap-4 md:self-end">
+          <div className="flex flex-col items-center md:flex-row md:items-center md:justify-end gap-2 md:gap-4">
             {/* Live ticking virtual time reference */}
-            <div className="bg-slate-100 border border-slate-200 hover:border-slate-300 py-1.5 px-3 rounded-lg flex items-center gap-2 text-xs text-gray-600">
+            <div className="bg-slate-100 border border-slate-200 hover:border-slate-300 py-1.5 px-3 rounded-lg flex items-center gap-2 text-xs text-gray-600 shrink-0">
               <Clock className="w-4 h-4 text-gray-400 shrink-0" />
               <span className="font-mono font-bold tracking-tight">
                 {new Date(currentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
@@ -501,33 +524,53 @@ export default function App() {
               <span className="font-mono text-gray-500 font-medium">15 Jun 2026</span>
             </div>
 
-            {/* Inbound Stats */}
-            <div className="bg-amber-50/80 border border-amber-200 py-1.5 px-3 rounded-lg flex items-center gap-2.5 text-xs text-amber-900 font-medium shadow-xs">
-              <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping absolute" />
-              <div className="w-2 h-2 rounded-full bg-amber-500 relative" />
-              <span>
-                <b className="font-mono font-bold">{stats.unresolved}</b> UNRESOLVED
-              </span>
-            </div>
+            {/* Inbound Stats Badges - grouped to stay side-by-side on mobile but on a separate line from date/time */}
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="bg-amber-50/80 border border-amber-200 py-1.5 px-3 rounded-lg flex items-center gap-2.5 text-xs text-amber-900 font-medium shadow-xs relative">
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping absolute" />
+                <div className="w-2 h-2 rounded-full bg-amber-500 relative" />
+                <span>
+                  <b className="font-mono font-bold">{stats.unresolved}</b> UNRESOLVED
+                </span>
+              </div>
 
-            <div className="bg-emerald-50 border border-emerald-100 py-1.5 px-3 rounded-lg flex items-center gap-2 text-xs text-emerald-800 font-medium shadow-xs">
-              <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3]" />
-              <span>
-                <b className="font-mono font-bold">{stats.resolved}</b> RESOLVED
-              </span>
-            </div>
+              <div className="bg-emerald-50 border border-emerald-100 py-1.5 px-3 rounded-lg flex items-center gap-2 text-xs text-emerald-800 font-medium shadow-xs">
+                <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3]" />
+                <span>
+                  <b className="font-mono font-bold">{stats.resolved}</b> RESOLVED
+                </span>
+              </div>
 
-            <button
-              onClick={() => setShowShortcutsHelp(true)}
-              className="hidden md:inline-flex bg-white hover:bg-slate-100 border border-gray-300 p-2 rounded-lg text-gray-600 shadow-xs hover:text-gray-900 transition-colors"
-              title="View Triage Keyboard Shortcuts [?]"
-            >
-              <Keyboard className="w-4 h-4" />
-            </button>
+              <button
+                onClick={() => setShowShortcutsHelp(true)}
+                className="hidden md:inline-flex bg-white hover:bg-slate-100 border border-gray-300 p-2 rounded-lg text-gray-600 shadow-xs hover:text-gray-900 transition-colors"
+                title="View Triage Keyboard Shortcuts [?]"
+              >
+                <Keyboard className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
         </div>
       </header>
+
+      {/* 1.5 FLOATING NEW MESSAGES BADGE */}
+      <AnimatePresence>
+        {newMessagesCount > 0 && (
+          <motion.button
+            initial={{ opacity: 0, y: -20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: -20, x: '-50%' }}
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              setNewMessagesCount(0);
+            }}
+            className="fixed top-20 md:top-36 left-1/2 z-35 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2 cursor-pointer transition-all border border-blue-500 outline-none select-none"
+          >
+            <span>↑ {newMessagesCount} new message{newMessagesCount > 1 ? 's' : ''} received</span>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 mt-6">
         
